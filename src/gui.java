@@ -1,6 +1,5 @@
 import java.awt.EventQueue;
 import java.rmi.Naming;
-import java.rmi.RemoteException;
 
 import javax.swing.JFrame;
 import javax.swing.GroupLayout;
@@ -11,15 +10,12 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
-public class Client {
+public class gui {
 
 	static int add;
 	static int multiply;
 	static int minus;
 	static float division;
-	private int x = 0;
-	private int y = 0;
-	private int selected = -1;
 	
 	
 	static ServerRMI obj = null;
@@ -33,7 +29,7 @@ public class Client {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					Client window = new Client();
+					gui window = new gui();
 					window.frame.setVisible(true);
 					obj = (ServerRMI)Naming.lookup("//" + "localhost:1200" + "/ServerRMI");
 				} catch (Exception e) {
@@ -46,7 +42,7 @@ public class Client {
 	/**
 	 * Create the application.
 	 */
-	public Client() {
+	public gui() {
 		initialize();
 	}
 
@@ -64,155 +60,90 @@ public class Client {
 		JButton button_divide = new JButton("/");
 		button_divide.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (selected != -1) {
-					textArea.append("/");
-					selected = -1;
-				} else {
-					System.out.println("Please enter a number.");
-				}
 			}
 		});
 		
 		JButton button_multiply = new JButton("*");
 		button_multiply.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (selected != -1) {
-					textArea.append("*");
-					selected = -1;
-				} else {
-					System.out.println("Please enter a number.");
-				}
 			}
 		});
 		
 		JButton button_minus = new JButton("-");
 		button_minus.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (selected != -1) {
-					textArea.append("-");
-					selected = -1;
-				} else {
-					System.out.println("Please enter a number.");
-				}
 			}
 		});
 		
 		JButton button_add = new JButton("+");
 		button_add.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (selected != -1) {
-					textArea.append("+");
-					selected = -1;
-				} else {
-					System.out.println("Please enter a number.");
-				}
 			}
 		});
 		
 		JButton button_no7 = new JButton("7");
 		button_no7.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				textArea.append("7");
-				selected = 1;
 			}
 		});
 		
 		JButton button_no8 = new JButton("8");
 		button_no8.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				textArea.append("8");
-				selected = 1;
 			}
 		});
 		
 		JButton button_no9 = new JButton("9");
 		button_no9.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				textArea.append("9");
-				selected = 1;
 			}
 		});
 		
 		JButton button_no4 = new JButton("4");
 		button_no4.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				textArea.append("4");
-				selected = 1;
 			}
 		});
 		
 		JButton button_5 = new JButton("5");
 		button_5.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				textArea.append("5");
-				selected = 1;
 			}
 		});
 		
 		JButton button_no6 = new JButton("6");
 		button_no6.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				textArea.append("6");
-				selected = 1;
 			}
 		});
 		
 		JButton button_no1 = new JButton("1");
 		button_no1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				textArea.append("1");
-				selected = 1;
 			}
 		});
 		
 		JButton button_no2 = new JButton("2");
 		button_no2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				textArea.append("2");
-				selected = 1;
 			}
 		});
 		
 		JButton button_no3 = new JButton("3");
 		button_no3.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				textArea.append("3");
-				selected = 1;
 			}
 		});
 		
 		JButton button_no0 = new JButton("0");
 		button_no0.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				textArea.append("0");
-				selected = 1;
 			}
 		});
 		
 		JButton btnSubmit = new JButton("Submit");
 		btnSubmit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String calculation = textArea.getText().toString();
-				String [] numbers;
-
-				if (selected != -1) {
-					if (calculation.contains("-")) {
-						try {
-							numbers = calculation.split("-");
-							x = Integer.parseInt(numbers[0]);
-							y = Integer.parseInt(numbers[1]);
-							minus = obj.Minus(x, y);
-							textArea.setText("" + minus);
-						} catch (RemoteException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}
-					}
-
-				} else {
-					System.out.println("Please finish calculation.");
-				}
-				
 			}
 		});
 		
