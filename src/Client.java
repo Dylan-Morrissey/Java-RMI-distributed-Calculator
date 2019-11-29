@@ -1,7 +1,14 @@
+/*
+Author: Dylan Morrissey
+Filename: Client.java
+Description: Client Calculator which connects to server
+Classname: Client
+Comment: The Calculator Client GUI.
+*/
+
 import java.awt.EventQueue;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
-
 import javax.swing.JFrame;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -16,10 +23,15 @@ public class Client {
 	static int add;
 	static int multiply;
 	static int minus;
-	static float division;
+	static int division;
 	private int x = 0;
 	private int y = 0;
 	private int selected = -1;
+	private boolean operatorSelected = false;
+	public JTextArea textArea = new JTextArea();
+	public JTextArea textArea_1 = new JTextArea();
+	private boolean operator_selected = false;
+	
 	
 	
 	static ServerRMI obj = null;
@@ -36,6 +48,7 @@ public class Client {
 					Client window = new Client();
 					window.frame.setVisible(true);
 					obj = (ServerRMI)Naming.lookup("//" + "localhost:1200" + "/ServerRMI");
+					obj.GetClientIP();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -49,6 +62,71 @@ public class Client {
 	public Client() {
 		initialize();
 	}
+	
+	public void CalculationRequest() {
+		String calculation = textArea.getText().toString();
+		String [] numbers;
+		if (selected != -1) {
+			if (calculation.contains("-")) {
+				try {
+					numbers = calculation.split("-");
+					x = Integer.parseInt(numbers[0]);
+					y = Integer.parseInt(numbers[1]);
+					textArea_1.setText("Minus Data sent to Server ");
+					minus = obj.Minus(x, y);
+					textArea.setText("" + minus);
+					textArea_1.append("\nMinus data recieved from Server ");
+				} catch (RemoteException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			} else if (calculation.contains("+")) {
+				try {
+					numbers = calculation.split("\\+");
+					x = Integer.parseInt(numbers[0]);
+					y = Integer.parseInt(numbers[1]);
+					textArea_1.setText("Add Data sent to Server ");
+					add = obj.Add(x, y);
+					textArea.setText("" + add);
+					textArea_1.append("\nAdd data recieved from Server ");
+				} catch (RemoteException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+			} else if (calculation.contains("*")) {
+				try {
+					numbers = calculation.split("\\*");
+					x = Integer.parseInt(numbers[0]);
+					y = Integer.parseInt(numbers[1]);
+					textArea_1.setText("Multiply Data sent to Server ");
+					multiply = obj.Multiply(x, y);
+					textArea.setText("" + multiply);
+					textArea_1.append("\nMultiply data recieved from Server ");
+				} catch (RemoteException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			} else if (calculation.contains("/")) {
+					try {
+						numbers = calculation.split("\\/");
+						x = Integer.parseInt(numbers[0]);
+						y = Integer.parseInt(numbers[1]);
+						textArea_1.setText("Divide Data sent to Server ");
+						division = obj.Divide(x, y);
+						textArea.setText("" + division);
+						textArea_1.append("\nDivide data recieved from Server ");
+					} catch (RemoteException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					
+			}
+		} else {
+			textArea_1.setText("Please finish calculation.");
+		}
+		operatorSelected = false;
+	}
 
 	/**
 	 * Initialize the contents of the frame.
@@ -58,17 +136,18 @@ public class Client {
 		frame.setBounds(100, 100, 276, 414);
 		frame.setTitle("Client Calculator");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		JTextArea textArea = new JTextArea();
-		
 		JButton button_divide = new JButton("/");
 		button_divide.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (selected != -1) {
+					if (operator_selected) {
+						CalculationRequest();
+					}
 					textArea.append("/");
 					selected = -1;
+					operator_selected = true;
 				} else {
-					System.out.println("Please enter a number.");
+					textArea_1.setText("Please enter a number.");
 				}
 			}
 		});
@@ -76,11 +155,21 @@ public class Client {
 		JButton button_multiply = new JButton("*");
 		button_multiply.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (selected != -1) {
-					textArea.append("*");
-					selected = -1;
+				if (operatorSelected == false) {
+					if (selected != -1) {
+						if (operator_selected) {
+							CalculationRequest();
+						}
+						textArea.append("*");
+						selected = -1;
+						operator_selected = true;
+					} else {
+						textArea_1.setText("Please enter a number.");
+					}
 				} else {
-					System.out.println("Please enter a number.");
+					CalculationRequest();
+					textArea.append("*");
+					
 				}
 			}
 		});
@@ -89,10 +178,14 @@ public class Client {
 		button_minus.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (selected != -1) {
+					if (operator_selected) {
+						CalculationRequest();
+					}
 					textArea.append("-");
 					selected = -1;
+					operator_selected = true;
 				} else {
-					System.out.println("Please enter a number.");
+					textArea_1.setText("Please enter a number.");
 				}
 			}
 		});
@@ -101,10 +194,14 @@ public class Client {
 		button_add.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (selected != -1) {
+					if (operator_selected) {
+						CalculationRequest();
+					}
 					textArea.append("+");
 					selected = -1;
+					operator_selected = true;
 				} else {
-					System.out.println("Please enter a number.");
+					textArea_1.setText("Please enter a number.");
 				}
 			}
 		});
@@ -192,37 +289,27 @@ public class Client {
 		JButton btnSubmit = new JButton("Submit");
 		btnSubmit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String calculation = textArea.getText().toString();
-				String [] numbers;
-
-				if (selected != -1) {
-					if (calculation.contains("-")) {
-						try {
-							numbers = calculation.split("-");
-							x = Integer.parseInt(numbers[0]);
-							y = Integer.parseInt(numbers[1]);
-							minus = obj.Minus(x, y);
-							textArea.setText("" + minus);
-						} catch (RemoteException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}
-					}
-
-				} else {
-					System.out.println("Please finish calculation.");
-				}
-				
+				CalculationRequest();
 			}
 		});
 		
-		JTextArea textArea_1 = new JTextArea();
+		JButton btnClear = new JButton("Clear");
+		btnClear.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				textArea.setText("");
+			}
+		});
+		
+		
+		
 		GroupLayout groupLayout = new GroupLayout(frame.getContentPane());
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
 					.addContainerGap()
 					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+						.addComponent(textArea, GroupLayout.DEFAULT_SIZE, 240, Short.MAX_VALUE)
+						.addComponent(btnClear, GroupLayout.DEFAULT_SIZE, 240, Short.MAX_VALUE)
 						.addComponent(textArea_1, GroupLayout.PREFERRED_SIZE, 238, GroupLayout.PREFERRED_SIZE)
 						.addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
 							.addGroup(groupLayout.createSequentialGroup()
@@ -254,9 +341,8 @@ public class Client {
 								.addPreferredGap(ComponentPlacement.RELATED)
 								.addComponent(button_no2, GroupLayout.PREFERRED_SIZE, 55, GroupLayout.PREFERRED_SIZE)
 								.addPreferredGap(ComponentPlacement.RELATED)
-								.addComponent(button_no3, GroupLayout.PREFERRED_SIZE, 55, GroupLayout.PREFERRED_SIZE))
-							.addComponent(textArea)))
-					.addContainerGap(39, Short.MAX_VALUE))
+								.addComponent(button_no3, GroupLayout.PREFERRED_SIZE, 55, GroupLayout.PREFERRED_SIZE))))
+					.addContainerGap())
 		);
 		groupLayout.setVerticalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
@@ -277,10 +363,9 @@ public class Client {
 						.addComponent(button_no6, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE))
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-							.addComponent(button_minus, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
-							.addComponent(button_no1, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
-							.addComponent(button_no2, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE))
+						.addComponent(button_minus, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
+						.addComponent(button_no1, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
+						.addComponent(button_no2, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
 						.addComponent(button_no3, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE))
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
@@ -288,8 +373,10 @@ public class Client {
 						.addComponent(button_add, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
 						.addComponent(btnSubmit, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE))
 					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(textArea_1, GroupLayout.PREFERRED_SIZE, 122, GroupLayout.PREFERRED_SIZE)
-					.addContainerGap(113, Short.MAX_VALUE))
+					.addComponent(btnClear, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
+					.addGap(18)
+					.addComponent(textArea_1, GroupLayout.PREFERRED_SIZE, 69, GroupLayout.PREFERRED_SIZE)
+					.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
 		);
 		frame.getContentPane().setLayout(groupLayout);
 	}
